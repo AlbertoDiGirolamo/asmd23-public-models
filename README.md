@@ -26,3 +26,34 @@ This method checks if the Petri system is bounded by comparing the number of tok
 A for-comprehension loop iterates over all paths and over all states in each path. 
 For each iteration, it checks if the size of the current state (i.e., the number of tokens in it) is less than or equal to the maximum number of tokens that can be in the Petri net. This is determined by the `maxTokenInPN` function.
 Finally, using `.reduce(_ && _)` all the boolean results are reduced using the logical AND operator. If all results are true, it means that the Petri net is bounded, so the function returns true. Otherwise, it returns false.
+
+# Task 3: ARTIST
+
+## Priorities
+The main idea is to add priority values for each transaction. Transactions with more high priority values have more priority for to be executed.
+So is added an extra parameter inside Trn clase class with 1 how to default value. It is usefull in case someone decide to not use priority function.
+
+* toSystem method is changed for transforms the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
+
+* `val maxPriority = allTransitions.map(_._1).max`: This line calculates the maximum priority among all transitions.  
+* `allTransitions.filter((p, _) => p == maxPriority).map(_._2)`: This line filters the transitions to keep only those with the maximum priority, and then maps the result to return only the markings, not the priorities.
+
+Then is added another operator for add different priorities. A possible example of its use is the follow: `MSet(*(ChooseAction)) ~~> MSet(*(ReadyToRead)) priority 5,` it add priority 5 for the transaction from ChooseAction to ReadyToRead.
+
+
+## Colors
+
+The goal is add another abstraction like different colors for each transaction/token.
+A transaction has to recevice and release a token with specific color.
+
+Is added a new calse class where is defined a couple of values (place-color)  
+```
+@targetName("Token")
+  case class *[P](place: P, color: Color = Color.Black)
+```
+The default color is black in case someone decide to not utilise the color abstraction.
+
+A possible example of this use is the follow:
+`MSet(*(Idle, Red)) ~~> MSet(*(ChooseAction, Black)),`
+in this case the transaction give a red token and release a black token.
+
