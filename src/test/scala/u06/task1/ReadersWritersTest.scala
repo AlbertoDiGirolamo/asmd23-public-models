@@ -18,5 +18,5 @@ class ReadersWritersTest extends AnyFunSuite:
     isReachable(MSet(Idle, Idle, HasPermission), 10) shouldBe true
 
   test("Boundness"):
-    isBounded(MSet(Idle, Idle, HasPermission), 10l) shouldBe true
+    isBounded(MSet(Idle, Idle, HasPermission), 10) shouldBe true
 
