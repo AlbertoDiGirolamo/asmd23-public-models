@@ -65,7 +65,7 @@ in this case the transaction give a red token and release a black token.
 
 The task's aim is to obtain some statistics about runs about CTMC like average time of done status during execution of nruns and find the percentage about the total time spent during fail status.
 
-THe solution is in `scala/u07/examples/StochasticChannelSimulation.scala`
+The solution is in `scala/u07/examples/StochasticChannelSimulation.scala`
 
 ### averageTimeStochasticChannel
 
@@ -82,6 +82,44 @@ THe solution is in `scala/u07/examples/StochasticChannelSimulation.scala`
 * For each pair of states, if the first state is FAIL, it adds the time difference between the two states to the fail time and sets the total time to the time of the second state. If the first state is not FAIL, it leaves the fail time unchanged and sets the total time to the time of the second state.
 * It adds the fail time and total time of the current run to the corresponding values in totalTimes.
 * Finally, it divides the total fail time by the total time to get the relative fail time.
+
+
+## Task 3: CHEMIST
+
+Task's purpose is realyse a dynamic simulation of chemical reactions. More specifically, let's simulate Brussellator's chemical reaction.
+
+The stochastic Petri Net of Brussellator is composed by six place named: A, B, D, E, X, Y. Therefore the Petri Net is composed by the following code: 
+```
+val spnBrussellator = SPN[Place](
+    Trn(MSet(A), m => 1.0 , MSet(X), MSet()),
+    Trn(MSet(X, X, Y), m => 1.0 , MSet(X, X, X), MSet()),
+    Trn(MSet(B, X), m => 1.0 , MSet(Y, D), MSet()),
+    Trn(MSet(X), m => 1.0 ,MSet(E), MSet())
+  )
+```
+
+The simulation is started with 6 initial place: 
+```
+val execution = toCTMC(spnBrussellator).newSimulationTrace(MSet(X,Y,A,B,B,B), new Random)
+      .take(10)
+      .toList
+```
+after that let's obtain a simulation execution where we consider only first 10 states. Each state is represented as a pair of a timestamp and a marking.
+An example of the contents of the execution variable is follow:
+```
+Event(0.0,{B|B|B|X|A|Y})
+Event(0.3075338571039183,{D|B|B|A|Y|Y})
+Event(1.8217323168205766,{Y|Y|D|B|B|X})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(2.215163872960756,{Y|Y|Y|D|D|B})
+
+```
+The xchart library is used to create a chart that shows the number of X and Y tokens over time.
 
 
 
