@@ -18,25 +18,19 @@ object BrussellatorSPetriNet:
   export u07.modelling.SPN.*
 
   val spnBrussellator = SPN[Place](
-    
-    Trn(MSet(A), m => 1 , MSet(X, A), MSet()),
-    Trn(MSet(X, X, Y), m => m(Y)*0.6 , MSet(X, X, X), MSet()),
-    Trn(MSet(B, X), m => m(X)*0.2 , MSet(Y, D, B), MSet()),
-    Trn(MSet(X), m => m(X)*0.5 ,MSet(E), MSet())
-  )
-
-  val spnBrussellator2 = SPN[Place](
-    Trn(MSet(A), m => 1, MSet(X, A), MSet()),
-    Trn(MSet(X, X, Y), m => m(Y), MSet(X, X, X), MSet()),
-    Trn(MSet(B, X), m => m(X)*0.5, MSet(Y, D, B), MSet()),
-    Trn(MSet(X), m => m(X)*0.5, MSet(E), MSet())
+    Trn(MSet(), m => 1, MSet(A), MSet()),
+    Trn(MSet(), m => 1, MSet(B), MSet()),
+    Trn(MSet(A), m => 1, MSet(X), MSet()),
+    Trn(MSet(X, X, Y), m =>  m(Y), MSet(X, X, X), MSet()),
+    Trn(MSet(B, X), m => m(X) * 0.5, MSet(Y, D), MSet()),
+    Trn(MSet(X), m => m(X) * 0.5, MSet(E), MSet())
   )
 
 
   @main def mainSPNBrussellator =
 
-    val initialMSet = MSet().fill(1)(A) union MSet().fill(3)(B) union MSet().fill(1)(X) union MSet().fill(1)(Y)union MSet().fill(0)(D)union MSet().fill(0)(E)
-    val execution = toCTMC(spnBrussellator2).newSimulationTrace(initialMSet, new Random)
+    val initialMSet = MSet().fill(1)(A) union MSet().fill(3)(B) union MSet().fill(1)(X) union MSet().fill(1)(Y)
+    val execution = toCTMC(spnBrussellator).newSimulationTrace(initialMSet, new Random)
       .take(1000)
       .toList
     execution.foreach(println)
@@ -48,6 +42,7 @@ object BrussellatorSPetriNet:
     val chart = QuickChart.getChart("Brusselator Simulation", "Time", "Count", "X", times, xCounts)
     chart.addSeries("Y", times, yCounts)
     chart.getStyler.setLegendVisible(true)
+    chart.getStyler.setMarkerSize(0)
 
     new SwingWrapper[XYChart](chart).displayChart().setTitle("Brusselator Simulation")
 

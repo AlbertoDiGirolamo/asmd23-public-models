@@ -23,21 +23,14 @@ object ReadersWritersSPetriNet:
     Trn(MSet(ReadyToWrite, HasPermission), m => 100000 , MSet(Writing), MSet(Reading)),
     Trn(MSet(Writing), m => 0.2 , MSet(Idle, HasPermission), MSet())
   )
-  /*
 
-  Trn(MSet(A), m => 1 , MSet(X, A), MSet()),
-    Trn(MSet(X, X, Y), m => m(Y)*0.6 , MSet(X, X, X), MSet()),
-    Trn(MSet(B, X), m => m(X)*0.2 , MSet(Y, D, B), MSet()),
-    Trn(MSet(X), m => m(X)*0.5 ,MSet(E), MSet())
-   */
-
-  def averageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place]) : Double =
+  def averageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place], stateToCheck: Place) : Double =
     val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
       val (rwTime, totTime) = toCTMC(spnReadersWriters).newSimulationTrace(initSet, new Random)
         .take(10)
         .toList
         .sliding(2)
-        .foldLeft((0.0, 0.0)) ( (z, s) =>  if (s(0).state(Place.Writing) > 0) (z._1 + (s(1).time - s(0).time), s(1).time) else (z._1, s(1).time))
+        .foldLeft((0.0, 0.0)) ( (z, s) =>  if (s(0).state(stateToCheck) > 0) (z._1 + (s(1).time - s(0).time), s(1).time) else (z._1, s(1).time))
       (acc._1 + rwTime, acc._2 + totTime)
     })
    
@@ -49,4 +42,5 @@ object ReadersWritersSPetriNet:
       .take(10)
       .toList
     execution.foreach(println)*/
-    println(averageTimeInReadersWritersState(10, initialMSet))
+    println(averageTimeInReadersWritersState(10, initialMSet, Place.Reading))
+    println(averageTimeInReadersWritersState(10, initialMSet, Place.Writing))
