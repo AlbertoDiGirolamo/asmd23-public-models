@@ -12,7 +12,7 @@ import u07.examples.StochasticChannel.{stocChannel, *}
         .take(10)
         .toList
         .mkString("\n")*/
-  //println(averageTimeStochasticChannel(10))
+  println(averageTimeStochasticChannel(10))
   println(relativeFailTime(10))
 
 
