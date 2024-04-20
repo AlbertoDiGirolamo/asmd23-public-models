@@ -63,19 +63,21 @@ in this case the transaction give a red token and release a black token.
 
 ## Task 1: SIMULATOR
 
-The task's aim is to obtain some statistics about runs about CTMC like average time of done status during execution of nruns and find the percentage about the total time spent during fail status.
+The task's aim is to obtain some runs statistics about CTMC like average time of done status during execution of nruns and find the percentage about the total time spent during fail status.
 
-The solution is in `scala/u07/examples/StochasticChannelSimulation.scala`
+The solution is in `scala/u07/modelling/CTMCSimulation.scala` where there are three API for obtain statistics about a generic CTMC.
 
-### averageTimeStochasticChannel
+### averageTimeToReachState
 
+* The function has 3 parameters: run number, start state and state to check reachability.
 * The function uses a range from 0 to nRun and applies the foldLeft operation on it. It is useful for obtain the sum about the total time spent in DONE status.
 * For each element t in the range, it simulates a stochastic channel trace with IDLE as the initial state.
-* It then finds the first occurrence where the state is DONE and maps it to its time.
+* It then finds the first occurrence where the state is in stateToCheck and maps it to its time.
 * Finally, the total time is divided by nRun to calculate the average time.
 
-### relativeFailTime
+### percentageTimeInState
 
+* The function has 3 parameters:  run number, start state and state to check the percentage.
 * The function initializes totalTimes as a tuple representing the total fail time and the total time of all simulations.
 * For each element in the range, it simulates a stochastic channel trace with IDLE as the initial state and it takes the first 10 states of this trace and converts it to a list.
 * It then uses the sliding method to create a sliding window of size 2 over the list. This allows it to compare each state with the next one.
@@ -91,10 +93,12 @@ Task's purpose is realyse a dynamic simulation of chemical reactions. More speci
 The stochastic Petri Net of Brussellator is composed by six place named: A, B, D, E, X, Y. Therefore the Petri Net is composed by the following code: 
 ```
 val spnBrussellator = SPN[Place](
-    Trn(MSet(A), m => 1.0 , MSet(X), MSet()),
-    Trn(MSet(X, X, Y), m => 1.0 , MSet(X, X, X), MSet()),
-    Trn(MSet(B, X), m => 1.0 , MSet(Y, D), MSet()),
-    Trn(MSet(X), m => 1.0 ,MSet(E), MSet())
+    Trn(MSet(), m => 1, MSet(A), MSet()),
+    Trn(MSet(), m => 1, MSet(B), MSet()),
+    Trn(MSet(A), m => 1, MSet(X), MSet()),
+    Trn(MSet(X, X, Y), m =>  m(Y), MSet(X, X, X), MSet()),
+    Trn(MSet(B, X), m => m(X) * 0.5, MSet(Y, D), MSet()),
+    Trn(MSet(X), m => m(X) * 0.5, MSet(E), MSet())
   )
 ```
 
@@ -107,21 +111,28 @@ val execution = toCTMC(spnBrussellator).newSimulationTrace(MSet(X,Y,A,B,B,B), ne
 after that let's obtain a simulation execution where we consider only first 10 states. Each state is represented as a pair of a timestamp and a marking.
 An example of the contents of the execution variable is follow:
 ```
-Event(0.0,{B|B|B|X|A|Y})
-Event(0.3075338571039183,{D|B|B|A|Y|Y})
-Event(1.8217323168205766,{Y|Y|D|B|B|X})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
-Event(2.215163872960756,{Y|Y|Y|D|D|B})
+Event(0.0,{B|B|B|Y|X|A})
+Event(0.149952306725683,{B|B|B|Y|X|A|A})
+Event(0.18013469803906576,{B|B|B|Y|X|A|A|A})
+Event(0.23547245929893335,{B|B|B|Y|X|A|A|A|A})
+Event(0.2736230767856125,{B|B|B|Y|X|A|A|A|A|A})
+Event(1.211966196786594,{B|B|B|Y|X|X|A|A|A|A})
+Event(1.3218807547538567,{B|B|B|Y|X|X|X|A|A|A})
+...
 
 ```
 The xchart library is used to create a chart that shows the number of X and Y tokens over time.
 
+The main problem here is to find a transactions's good rate level. 
 
+What follows is a logical explanation.
+Consider a system where the transition rate of reactions that consume molecule Y and produce molecule X is proportional to the quantity of Y. This means that the greater the amount of Y in the system, the higher the transition rate, and vice versa.
+
+Similarly, the transition rates for reactions that consume molecule X depend on the amount of X present. Hence, a higher concentration of X results in increased transition rates, and a lower concentration results in decreased rates.
+
+In the Brussellator model, there are two transitions that consume X. To account for these dual consumption pathways, the rate of each transition involving the consumption of X is halved, or multiplied by 0.5. Conversely, there is only one transition that consumes Y.
+
+![Brussellator graph]([https://github.com/...](https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/brussellator.png))
 
 
 
