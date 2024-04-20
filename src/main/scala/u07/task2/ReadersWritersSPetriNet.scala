@@ -24,7 +24,7 @@ object ReadersWritersSPetriNet:
     Trn(MSet(Writing), m => 0.2 , MSet(Idle, HasPermission), MSet())
   )
 
-  def averageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place], stateToCheck: Place) : Double =
+  def percentageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place], stateToCheck: Place) : Double =
     val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
       val (rwTime, totTime) = toCTMC(spnReadersWriters).newSimulationTrace(initSet, new Random)
         .take(10)
@@ -33,14 +33,15 @@ object ReadersWritersSPetriNet:
         .foldLeft((0.0, 0.0)) ( (z, s) =>  if (s(0).state(stateToCheck) > 0) (z._1 + (s(1).time - s(0).time), s(1).time) else (z._1, s(1).time))
       (acc._1 + rwTime, acc._2 + totTime)
     })
-   
+
+
     totalTimes._1 / totalTimes._2
 
   @main def mainSPNReadersWriters =
-    val initialMSet = MSet().fill(2)(Idle) union MSet().fill(1)(HasPermission)
+    val initialMSet = MSet().fill(5)(Idle) union MSet().fill(1)(HasPermission)
     /*val execution = toCTMC(spnReadersWriters).newSimulationTrace(initialMSet, new Random)
       .take(10)
       .toList
     execution.foreach(println)*/
-    println(averageTimeInReadersWritersState(10, initialMSet, Place.Reading))
-    println(averageTimeInReadersWritersState(10, initialMSet, Place.Writing))
+    println(percentageTimeInReadersWritersState(10, initialMSet, Place.Reading))
+    println(percentageTimeInReadersWritersState(10, initialMSet, Place.Writing))
