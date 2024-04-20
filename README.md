@@ -85,6 +85,59 @@ The solution is in `scala/u07/modelling/CTMCSimulation.scala` where there are th
 * It adds the fail time and total time of the current run to the corresponding values in totalTimes.
 * Finally, it divides the total fail time by the total time to get the relative fail time.
 
+## Task 2: GURU
+
+First of all i realised a stochastic Petri Net of Readers and Writer using rates level provided by lecture lesson.
+The possible place inside this net are the follow: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
+
+The stochastic Petri Net realised is the follow:
+
+```
+val spnReadersWriters = SPN[Place](
+    Trn(MSet(Idle), m => 1 , MSet(ChooseAction), MSet()),
+    Trn(MSet(ChooseAction), m => 200000 , MSet(ReadyToRead), MSet()),
+    Trn(MSet(ChooseAction), m => 100000 , MSet(ReadyToWrite), MSet()),
+    Trn(MSet(ReadyToRead, HasPermission), m => 100000 , MSet(Reading, HasPermission), MSet()),
+    Trn(MSet(Reading), m => 0.1 * m(Reading) , MSet(Idle), MSet()),
+    Trn(MSet(ReadyToWrite, HasPermission), m => 100000 , MSet(Writing), MSet(Reading)),
+    Trn(MSet(Writing), m => 0.2 , MSet(Idle, HasPermission), MSet())
+  )
+
+```
+
+To perform this task I realised a function for obtain the percentage presence of a particular state.
+```
+ def percentageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place], stateToCheck: Place) : Double =
+    val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
+      val (rwTime, totTime) = toCTMC(spnReadersWriters).newSimulationTrace(initSet, new Random)
+        .take(10)
+        .toList
+        .sliding(2)
+        .foldLeft((0.0, 0.0)) ( (z, s) =>  if (s(0).state(stateToCheck) > 0) (z._1 + (s(1).time - s(0).time), s(1).time) else (z._1, s(1).time))
+      (acc._1 + rwTime, acc._2 + totTime)
+    })
+
+
+    totalTimes._1 / totalTimes._2
+```
+
+with `(s(0).state(stateToCheck) > 0` it check if during a simulation a particular state is present.
+
+Following is write a table with some statistics about different rate value of Reading and Writing transaction:
+
+| Reading | Writing | % of time in Reading | % of time in Writing |
+|--------------|--------------|----------------------|----------------------|
+| 400000       | 100000       | 90.1%                | 7.4%                 |
+| 300000       | 100000       | 79.4%                | 14.1%                |
+| 200000       | 100000       | 65.3%                | 20.8%                |
+| 100000       | 100000       | 53.6%                | 41.7%                |
+| 100000       | 200000       | 36.4%                | 52.8%                |
+| 100000       | 300000       | 30.2%                | 55.0%                |
+| 100000       | 400000       | 21.8%                | 74.3%                |
+
+The rate value and the percentage follow a behaviour direct proportional like
+
+
 
 ## Task 3: CHEMIST
 
@@ -132,7 +185,7 @@ Similarly, the transition rates for reactions that consume molecule X depend on 
 
 In the Brussellator model, there are two transitions that consume X. To account for these dual consumption pathways, the rate of each transition involving the consumption of X is halved, or multiplied by 0.5. Conversely, there is only one transition that consumes Y.
 
-![Brussellator graph]([https://github.com/...](https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/brussellator.png))
+![Brussellator graph](https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/brussellator.png)
 
 
 
