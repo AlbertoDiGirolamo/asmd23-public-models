@@ -32,7 +32,7 @@ object CTMCSimulation:
           .toList
           .find(e => e._2 == stateToCheck).map(e => e.time).getOrElse(0.0)) / nRun
 
-    def relativeTimeInState(nRun: Int, initialState: S, stateToCheck: S): Double =
+    def percentageTimeInState(nRun: Int, initialState: S, stateToCheck: S): Double =
       val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
         val (conditionTime, totTime) = self.newSimulationTrace(initialState, new Random)
           .take(10)

@@ -8,7 +8,7 @@ export u07.modelling.CTMCSimulation.*
 
 @main def mainStochasticChannelSimulation =
   println(stocChannel.averageTimeToReachState(10, IDLE, DONE))
-  println(stocChannel.relativeTimeInState(10, IDLE, FAIL))
+  println(stocChannel.percentageTimeInState(10, IDLE, FAIL))
 
   /*Time.timed:
     println:
