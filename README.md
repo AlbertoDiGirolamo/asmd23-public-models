@@ -187,6 +187,69 @@ In the Brussellator model, there are two transitions that consume X. To account 
 
 ![Brussellator graph](https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/brussellator.png)
 
+# Lab 08
+
+## Task 1: PRISM
+
+For perform this task i'ss needed to write the model of Writers and Readers.
+It is in the lecture slide like follow:
+
+```
+ctmc
+const int N = 20;
+
+module RW
+
+p1 : [0..N] init N;
+p2 : [0..N] init 0;
+p3 : [0..N] init 0;
+p4 : [0..N] init 0;
+p5 : [0..N] init 1;
+p6 : [0..N] init 0;
+p7 : [0..N] init 0;
+
+[t1] p1>0 & p2<N  -> 1 : (p1'=p1-1)&(p2'=p2+1);
+[t2] p2>0 & p3<N ->  200000 : (p2'=p2-1) & (p3'=p3+1);
+[t3] p2>0 & p4<N -> 100000 : (p2'=p2-1) & (p4'=p4+1);
+[t4] p3>0 & p5>0 & p6<N -> 100000 : (p3'=p3-1) & (p6'=p6+1);
+[t5] p4>0 & p5>0 & p6=0 & p7<N -> 100000 : (p4'=p4-1) & (p5'=p5-1) & (p7'=p7+1);
+[t6] p6>0 & p1<N -> p6*1 : (p6'=p6-1) & (p1'=p1+1);
+[t7] p7>0 & p5<N & p1<N -> 0.5 : (p7'=p7-1) & (p1'=p1+1) & (p5'=p5+1);
+
+endmodule
+```
+After that, I used probabilistic model checker PRISM to check some probabilities about some characteristics that a Readers and Writers system must guarantee.
+
+### Condition: p6 > 0
+This property aims to verify the operational capability of the Readers and Writers System. It means that anyone who wishes to read within the system should be able to do so sooner or later.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/cond%20p6.png" width="500px">
+
+It shows the probability increasing; after around 10 iterations, the probability is close to 1.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/p6.png" width="500px">
+
+###  Condition: p7 > 0
+Like the previous property, It means that anyone who wishes to write within the system should be able to do so sooner or later.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/cond%20p7.png" width="500px">
+
+It shows the probability increasing; after around 10 iterations, the probability is close to 1.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/p7.png" width="500px">
+
+###  Condition: p6 > 0 & p7 > 0
+
+This experiment whant to demonstrate the impossibility to do in the same time read and write operations.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/p6%20and%20p7.png" width="500px">
+
+This graph show 0 probability for that condition.
+
+<img src="https://github.com/AlbertoDiGirolamo/asmd23-public-models/blob/master/lab08IMG/cond%20p6%20and%20p7.png" width="500px">
+
+
+
 
 
 
