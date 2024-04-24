@@ -270,13 +270,7 @@ Yes LLM know what is and know its utility.
 
 >Can you write the property for check if is possible that exist an scenario where p6 and p7 have both a token?
 
->Sure, to express the property that both p6 and p7 have at least one token simultaneously, you can use the temporal logic formula in PRISM. One way to express this property is using the Until operator. The property can be written as:
-
-```
-Pmax=? [ F (p6>0 & p7>0) ]
-```
-
-> This property translates to: "What is the maximum probability that eventually (F) both p6 and p7 have at least one token?" Here's a breakdown of the components: - `Pmax=?`: This part of the formula asks for the maximum probability. PRISM will compute the maximum probability of the specified event occurring. - `[ F (p6>0 & p7>0) ]`: This is the actual property being checked. It states that eventually (`F` for "finally") both `p6` and `p7` have at least one token (`p6>0 & p7>0`). You can input this property into PRISM along with your model to check if there exists a scenario where both `p6` and `p7` have at least one token with a non-zero probability.
+>Sure, to express the property that both p6 and p7 have at least one token simultaneously, you can use the temporal logic formula in PRISM. One way to express this property is using the Until operator. The property can be written as: `Pmax=? [ F (p6>0 & p7>0) ]`. This property translates to: "What is the maximum probability that eventually (F) both p6 and p7 have at least one token?" Here's a breakdown of the components: - `Pmax=?`: This part of the formula asks for the maximum probability. PRISM will compute the maximum probability of the specified event occurring. - `[ F (p6>0 & p7>0) ]`: This is the actual property being checked. It states that eventually (`F` for "finally") both `p6` and `p7` have at least one token (`p6>0 & p7>0`). You can input this property into PRISM along with your model to check if there exists a scenario where both `p6` and `p7` have at least one token with a non-zero probability.
 
 Yes LLM can write a correct proprety from a text request.
 
