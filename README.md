@@ -252,12 +252,21 @@ This graph show 0 probability for that condition.
 
 To perform this task I used LLM ChatGPT.
 
+1. For the first question I asked a generic sentence about model checker knowledge.
+
 > Do you know what is this [Readers and Writers model checker]
 
 >This appears to be a model defined in the Continuous-Time Markov Chain (CTMC) formalism using the probabilistic model checker tool PRISM. CTMCs are a mathematical model used to describe the stochastic behavior of systems that evolve over continuous time according to probabilistic transitions between states. In this model, there are seven states labeled as p1 through p7, each representing the number of tokens in different places. Transitions between these states are probabilistic and are labeled with actions (t1 through t7) and associated probabilities or rates. For example, [t1] represents an action that can occur when there are tokens in p1 and space in p2, with a probability of 1. Upon this action, one token moves from p1 to p2.The rest of the transitions similarly represent the movement of tokens between different places according to certain conditions and probabilities. This model seems to describe a system involving the movement of tokens between different locations, with varying probabilities or rates associated with each transition.
 
+Yes LLM know what is and know its utility.
+
+2. Now I'm trying to taste if LLM the main concept about our exercise: stochastic property. It is essential for model cheking.
+
 >Can you understand the meaning of a stochastic property?
+
 >Certainly! In the context of a stochastic model like the one you provided, a stochastic property typically refers to a quantitative measure or condition that characterizes the behavior of the system in probabilistic terms. Stochastic properties are often expressed as logical assertions or quantitative metrics that describe certain aspects of the system's behavior over time.For example, some common stochastic properties include:1. **Reachability**: Whether a certain state or set of states can be reached from a given initial state with a non-zero probability.2. **Transient Analysis**: The probability distribution or expected time until reaching a particular state or set of states from a given initial state.3. **Steady-State Analysis**: The long-term behavior of the system, often characterized by the probability distribution of being in different states after the system has run for a sufficiently long time.4. **Safety Properties**: Properties that specify that certain unwanted states or behaviors should never occur with a high probability.5. **Liveness Properties**: Properties that specify that certain desired states or behaviors should eventually occur with a high probability. To analyze stochastic properties, probabilistic model checking tools like PRISM can be used. These tools allow users to express properties in temporal logic or other formalisms and then automatically check whether these properties hold for the given stochastic model.
+
+3. I want to try if LLM can understand what kind of proprety I like to check and taste if it is correct or not.
 
 >Can you write the property for check if is possible that exist an scenario where p6 and p7 have both a token?
 
@@ -269,9 +278,26 @@ Pmax=? [ F (p6>0 & p7>0) ]
 
 > This property translates to: "What is the maximum probability that eventually (F) both p6 and p7 have at least one token?" Here's a breakdown of the components: - `Pmax=?`: This part of the formula asks for the maximum probability. PRISM will compute the maximum probability of the specified event occurring. - `[ F (p6>0 & p7>0) ]`: This is the actual property being checked. It states that eventually (`F` for "finally") both `p6` and `p7` have at least one token (`p6>0 & p7>0`). You can input this property into PRISM along with your model to check if there exists a scenario where both `p6` and `p7` have at least one token with a non-zero probability.
 
+Yes LLM can write a correct proprety from a text request.
+
+4. Now from a specific proprety I find out if LLM understand what it means. I'm tring with reading status. 
 > Do you know what `P=? [(true) U<=k (p6>0)]` means?
 
 > Yes, I can explain that to you. The formula `P=? [(true) U<=k (p6>0)]` is a probabilistic reachability property in PRISM, expressed in the probabilistic computation tree logic (PCTL). Let's break it down: - `P=?`: This part indicates that we are asking for the probability of the specified property. The `?` symbol means "what is the probability that...". - `[(true) U<=k (p6>0)]`: This is the actual property being checked. It's a Until (U) temporal operator with a probability bound.  - `(true)`: This part represents a trivial condition that is always true, essentially indicating that the property holds from any state. - `U<=k`: This is the Until operator bounded by a probability threshold `k`. It means "until" with a probability threshold. It checks whether a condition holds until another condition is reached with at most probability `k`. - `(p6>0)`: This is the condition we are interested in. It specifies that `p6` has at least one token. So, putting it all together, the property `P=? [(true) U<=k (p6>0)]` asks: "What is the probability that from any state, `p6` will have at least one token before reaching a state with probability at most `k`?" In other words, it's checking the probability of reaching a state where `p6` has at least one token before reaching a state with a probability less than or equal to `k`.
 
+In this case too it is able to know what it means correctly.
 
+5. I'm tring to check if LLM can intepret directly a model and verify some proprety.
+> From this model [Readers and Writers model checker] give me the answer of this proprety `[(true) U<=k (p6>0)&(p7>0)]`
 
+> I'm sorry but I can't interpret this model directly. You have to use for example PRISM and then check the property.
+
+It can't elaborate directly a model.
+
+6. But I can try to ask if it can interpret a model without a directly elaborate and try to verify a possible prorpety.
+
+> ok, can you interprets this property `[(true) U<=k (p6>0)&(p7>0)]` and give me a plausible solution without execute that model?
+
+> Let's analyze the possibility and conditions under which both p6 and p7 can simultaneously have at least one token, given the transitions defined in your model. This analysis will help us interpret the property P=? [(true) U<=k (p6>0)&(p7>0)] without actually executing it in PRISM. System Analysis: Initial Conditions: p1 starts full at N tokens. p2, p3, p4, p6, and p7 start empty. p5 starts with 1 token. Transition Analysis: Transition t1: Moves a token from p1 to p2. Transition t2: Moves a token from p2 to p3. Transition t3: Moves a token from p2 to p4. Transition t4: Requires p3 > 0 and p5 > 0, moves a token from p3 to p6. Transition t5: Requires p4 > 0, p5 > 0, and p6 = 0. It moves a token from p4 to p7 and decreases p5 by 1. Transition t6: Recycles tokens from p6 back to p1. Transition t7: Recycles tokens from p7 back to both p1 and p5. Analysis for Simultaneous Token Presence in p6 and p7: For p6: Tokens reach p6 via t4, which depends on p3 (populated via t2). For p7: Tokens reach p7 via t5, which depends on p4 (populated via t3) and requires p6 = 0. Given these dependencies and conditions, it seems structurally challenging for both p6 and p7 to have tokens simultaneously under the model's initial conditions and transition rules. This difficulty stems from t5 requiring p6 = 0 to allow a token to move to p7. This setup creates a mutual exclusion between tokens in p6 and p7. Plausible Path Analysis: A token in p6 would need to be moved or recycled via t6 or other mechanisms before a token could be moved to p7 via t5. Since t5 also consumes a token in p5 and requires p6 = 0, the opportunity for overlap is essentially null under the current configuration unless additional dynamics or states change (e.g., modifying transition conditions or adding new paths that allow simultaneous token presence without the p6 = 0 constraint in t5). Conclusion: Based on the given model setup and transition rules, it appears improbable (structurally impossible under current rules) that p6 and p7 can simultaneously contain tokens. Therefore, the property P=? [(true) U<=k (p6>0)&(p7>0)] would likely evaluate to a very low probability or even zero, unless the model's structure or initial conditions are changed to allow such an event.
+
+Yes It can give us a possible solution, in this case the result is exactly 0, so it is correct.
