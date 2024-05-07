@@ -295,3 +295,105 @@ It can't elaborate directly a model.
 > Let's analyze the possibility and conditions under which both p6 and p7 can simultaneously have at least one token, given the transitions defined in your model. This analysis will help us interpret the property P=? [(true) U<=k (p6>0)&(p7>0)] without actually executing it in PRISM. System Analysis: Initial Conditions: p1 starts full at N tokens. p2, p3, p4, p6, and p7 start empty. p5 starts with 1 token. Transition Analysis: Transition t1: Moves a token from p1 to p2. Transition t2: Moves a token from p2 to p3. Transition t3: Moves a token from p2 to p4. Transition t4: Requires p3 > 0 and p5 > 0, moves a token from p3 to p6. Transition t5: Requires p4 > 0, p5 > 0, and p6 = 0. It moves a token from p4 to p7 and decreases p5 by 1. Transition t6: Recycles tokens from p6 back to p1. Transition t7: Recycles tokens from p7 back to both p1 and p5. Analysis for Simultaneous Token Presence in p6 and p7: For p6: Tokens reach p6 via t4, which depends on p3 (populated via t2). For p7: Tokens reach p7 via t5, which depends on p4 (populated via t3) and requires p6 = 0. Given these dependencies and conditions, it seems structurally challenging for both p6 and p7 to have tokens simultaneously under the model's initial conditions and transition rules. This difficulty stems from t5 requiring p6 = 0 to allow a token to move to p7. This setup creates a mutual exclusion between tokens in p6 and p7. Plausible Path Analysis: A token in p6 would need to be moved or recycled via t6 or other mechanisms before a token could be moved to p7 via t5. Since t5 also consumes a token in p5 and requires p6 = 0, the opportunity for overlap is essentially null under the current configuration unless additional dynamics or states change (e.g., modifying transition conditions or adding new paths that allow simultaneous token presence without the p6 = 0 constraint in t5). Conclusion: Based on the given model setup and transition rules, it appears improbable (structurally impossible under current rules) that p6 and p7 can simultaneously contain tokens. Therefore, the property P=? [(true) U<=k (p6>0)&(p7>0)] would likely evaluate to a very low probability or even zero, unless the model's structure or initial conditions are changed to allow such an event.
 
 Yes It can give us a possible solution, in this case the result is exactly 0, so it is correct.
+
+# Lab 09
+
+## Task 1: BASIC-Q-LEARNING
+
+For improve this task I used `TryQLearningMatrix.scala` example and write some experiment changing the follow parameters: gamma, alpha and epsilon
+
+
+### gamma
+
+gamma (Discount Factor) is a number between 0 and 1 and determines the importance of future rewards. Increasing gamma will make the agent more focused on long-term rewards. This could lead to the agent taking actions that may not have an immediate reward but will lead to a higher reward in the future. Decreasing gamma will make the agent more short-sighted, focusing more on immediate rewards.
+
+For instance we use the follow configuration:
+* Hight gamma value like 0.9
+* Two jumps: (1,0) => (1,4) and (3,0) => (3,2) with this reward: 5 and 10
+
+we obtain the following policy:
+```
+      >	      >	      >	      v	      <
+      >	      >	      >	      ^	      <
+      ^	      >	      >	      ^	      <
+      ^	      >	      >	      ^	      <
+      ^	      >	      >	      ^	      <
+
+```
+Let's see that this configuration tents to ignore the first jump because an hight gamma value make more focus on long-term reward, in this case policy tents to get the second jump with more reward.
+
+If we change the gamma value using a lower input like: 0.2, we obtain this policy:
+
+```
+      >	      v	      >	      v	      <
+      >	      ^	      >	      ^	      <
+      >	      ^	      ^	      ^	      ^
+      >	      ^	      ^	      ^	      ^
+      >	      ^	      ^	      ^	      ^
+```
+even if the second jump's reward  is two times bigger than the first one, we obtain a few path to the first jump. This happens because the short-term reward grow of importance.
+
+
+### alpha
+
+alpha (Learning Rate) is also a number between 0 and 1 and represents the extent to which the newly acquired information will override the old information. Increasing alpha will make the agent learn faster from new experiences, meaning it will quickly adapt to changes in the environment. However, a high alpha can also cause the agent to forget previous learnings quickly. Decreasing alpha will make the agent learn slower, meaning it will take longer to adapt to changes in the environment but will retain previous learnings for longer.
+
+Using the that example if I change the alpha value with the a lower value and after a higher value (0.1 and 0.9), policy and v-table don't change significantly.
+### epsilon
+
+epsilon (Exploration Rate) is the probability that our agent will explore the environment rather than exploit it. Increasing epsilon will make the agent explore the environment more, meaning it will take more random actions to discover new states. This can be beneficial in environments where the agent has not explored much yet. Decreasing epsilon will make the agent exploit its current knowledge more, meaning it will take the actions that it believes will lead to the highest reward based on its current knowledge.
+
+* I chose to elevate the matrix size like (10, 10) for improve the changing visual effect.
+
+* Adding an extra reward opposite to the initial state which its reward is elevated (like 100) I create a position that represents the best end-point.
+```case ((8,8),DOWN) => 100;```
+
+The best policy must catch that poit and create the best path to arrive in this case (8,8).
+If we maintain a lower epsilon value, Q-learning might not create a better path because it is not programmed to try to explore the matrix if it found a possible good end-point.
+For istance with a epsilon value of 0.3 we obtain this policy:
+```
+      >	      v	      <	      <	      <	      v	      v	      >	      >	      >
+      >	      ^	      <	      <	      <	      <	      <	      ^	      >	      <
+      >	      ^	      <	      <	      <	      <	      ^	      >	      v	      >
+      >	      ^	      <	      <	      ^	      <	      v	      ^	      v	      >
+      >	      ^	      <	      <	      <	      ^	      <	      >	      v	      <
+      >	      ^	      <	      <	      <	      ^	      ^	      >	      >	      <
+      ^	      ^	      ^	      <	      <	      <	      >	      >	      v	      >
+      ^	      ^	      ^	      <	      ^	      >	      ^	      >	      v	      >
+      >	      >	      ^	      ^	      <	      ^	      >	      >	      v	      <
+      ^	      ^	      <	      ^	      ^	      >	      >	      >	      ^	      <
+```
+Let's see that with (0, 0) initial position, the probability to find the point with most reward is not in our favor because this policy hasn't the tendency to deep exploration.
+
+Otherwise, if we grow the epsilon value to 0.8 for instance we can observe that policy tends to reach the max reward:
+
+```
+      >	      v	      <	      v	      >	      >	      >	      >	      v	      <
+      >	      ^	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      v	      <
+      >	      >	      >	      >	      >	      >	      >	      >	      ^	      <
+```
+### Episodes number
+
+Until now as always been used 10000 how number of episodes for learners.
+```
+      >	      v	      <	      v	      <
+      >	      ^	      <	      ^	      <
+      >	      ^	      <	      ^	      <
+      >	      ^	      <	      ^	      <
+      >	      ^	      <	      ^	      <
+```
+If we decrease significantly this number like 100, we can observe that the policy accuracy decreases significantly
+```
+      >	      v	      <	      v	      <
+      >	      ^	      <	      ^	      <
+      >	      ^	      <	      ^	      <
+      ^	      ^	      ^	      ^	      ^
+      ^	      ^	      ^	      ^	      <
+```
