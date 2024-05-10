@@ -397,3 +397,41 @@ If we decrease significantly this number like 100, we can observe that the polic
       ^	      ^	      ^	      ^	      ^
       ^	      ^	      ^	      ^	      <
 ```
+## Task 2: DESIGN-BY-Q-LEARNING
+
+For improve this task I used `TryQLearningMatrix.scala` example to implement my own Q-learning algorithm.
+I created a ExtendedQMatrix class for modify the QMatrix already implemented. 
+
+### Corridor
+
+For simulate map composed by a corridor I created a Matrix 10x5.
+
+I want to simulate the corridor's wall, so I set a negative reward when Q-learning try to go outside the map:
+
+```
+case ((_,0),RIGHT) => -10;
+case ((_,4),RIGHT) => -10;
+```
+The initial state is  `initial = (0,1)`.
+
+In case we want to add some obstacles is possible to add it like a negative reward in case Q-learning try to go in that direction.
+I saved the position of the obstacles in a list `def obstacles: Set[(Int, Int)] = Set((2,1), (5,2))` and i check every time if the next state is an obstacle and in case i set a negative reward.
+
+### Items
+
+For improve this part i added some items in a map. These items have a positive reward.
+Every time an items is collected, that is removed from the map. I use a list for save the position of the items inside the world `var totalItems = Set((1, 1), (3, 3), (7, 2))`
+and a list for maintain in memory the concept of remaining items in a play `var remainingItems = Set((1, 1), (3, 3), (7, 2))`.
+An item is identify by  `*` symbol.
+
+For avoid that the best policy maintain a static policy near the item position i add a negative reward in case robot cross to a position where items was present.
+`case (s, a) if totalItems.contains(s) && !remainingItems.contains(s) => (totalItems.size-remainingItems.size + 1) * -4` it adds a negative growing reward.
+
+For to keep the robot moving and collect all items, each items has a growing rewarding value. 
+```
+case(s, a) if remainingItems.contains(s) =>
+    remainingItems = remainingItems - s
+    (totalItems.size-remainingItems.size + 1) * 20
+```
+
+AGGIUNGERE CONCETTO RESET
