@@ -1,5 +1,7 @@
 package scala.u09.model
 
+import scala.u09.model.ResetFunction
+
 object QMatrix:
 
   type Node = (Int, Int)
@@ -36,8 +38,9 @@ object QMatrix:
         // computes rewards, and possibly a jump
         (reward.apply((s, a)), jumps.orElse[(Node, Move), Node](_ => n2)(s, a))
 
+    val resetFunction:ResetFunction = () => ()
     def qFunction = QFunction(Move.values.toSet, v0, terminal)
-    def qSystem = QSystem(environment = qEnvironment(), initial, terminal)
+    def qSystem = QSystem(environment = qEnvironment(), initial, terminal, resetFunction)
     def makeLearningInstance() = QLearning(qSystem, gamma, alpha, epsilon, qFunction)
 
     def show[E](v: Node => E, formatString: String): String =

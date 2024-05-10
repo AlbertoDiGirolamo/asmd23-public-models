@@ -3,6 +3,8 @@ package scala.u09.model
 import u09.utils.Stochastics.{cumulative, draw}
 import u09.utils.Stochastics
 
+trait ResetFunction:
+  def execute(): Unit
 trait QRL:
   type State
   type Action
@@ -28,6 +30,8 @@ trait QRL:
     def initial: State
     def terminal: State => Boolean
     def run(p: Policy): LazyList[(Action, State)]
+
+    def resetFunction: ResetFunction
 
   // an updatable, table-oriented QFunction, to optimise selection over certain actions
   trait Q extends ((State, Action) => Reward):

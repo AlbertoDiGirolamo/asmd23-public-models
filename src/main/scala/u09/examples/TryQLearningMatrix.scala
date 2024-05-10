@@ -14,9 +14,9 @@ object TryQMatrix extends App :
     terminal = {case _=>false},
     reward = { case ((1,0),DOWN) => 10; case ((3,0),DOWN) => 5; case _ => 0},
     jumps = { case ((1,0),DOWN) => (1,4); case ((3,0),DOWN) => (3,2) },
-    gamma = 0.5,
+    gamma = 0.9,
     alpha = 0.5,
-    epsilon = 0.5,
+    epsilon = 0.3,
     v0 = 1
   )
 
@@ -25,3 +25,5 @@ object TryQMatrix extends App :
   val q1 = rl.makeLearningInstance().learn(100,100,q0) //10000 episodes, 100 max length
   println(rl.show(q1.vFunction,"%2.2f"))
   println(rl.show(s => q1.bestPolicy(s).toString,"%7s"))
+  
+  

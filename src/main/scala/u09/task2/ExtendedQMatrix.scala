@@ -1,6 +1,6 @@
 package scala.u09.task2
 
-import scala.u09.model.QRLImpl
+import scala.u09.model.{QRLImpl, ResetFunction}
 
 object ExtendedQMatrix:
 
@@ -19,11 +19,13 @@ object ExtendedQMatrix:
                      initial: Node,
                      terminal: PartialFunction[Node, Boolean],
                      reward: PartialFunction[(Node, Move), Double],
-                     obstacles: Set[Node],
                      jumps: PartialFunction[(Node, Move), Node],
+                     obstacles: Set[Node],
+                     itemsToCollect: Set[Node],
                      gamma: Double,
                      alpha: Double,
                      epsilon: Double = 0.0,
+                     resetMap: ResetFunction,
                      v0: Double) extends QRLImpl:
     type State = Node
     type Action = Move
@@ -35,12 +37,11 @@ object ExtendedQMatrix:
           case ((n1, n2), DOWN) => (n1, (n2 + 1) min (height - 1))
           case ((n1, n2), LEFT) => ((n1 - 1) max 0, n2)
           case ((n1, n2), RIGHT) => ((n1 + 1) min (width - 1), n2)
-          case _ => ???
         // computes rewards, and possibly a jump
         (reward.apply((s, a)), jumps.orElse[(Node, Move), Node](_ => n2)(s, a))
 
-    def qFunction = QFunction(Move.values.toSet, v0, terminal)
-    def qSystem = QSystem(environment = qEnvironment(), initial, terminal)
+    def qFunction = QFunction(Move.values.toSet, v0, terminal, 140)
+    def qSystem = QSystem(environment = qEnvironment(), initial, terminal, resetMap)
     def makeLearningInstance() = QLearning(qSystem, gamma, alpha, epsilon, qFunction)
 
     def show[E](v: Node => E, formatString: String): String =
@@ -50,14 +51,3 @@ object ExtendedQMatrix:
       yield
           formatString.format(v((col, row))) + (if (col == width - 1) "\n" else "\t")
       ).mkString("")
-    
-    def showPath[E](v: Node => E, formatString: String, obstacles: Set[(Int, Int)]): String =
-      (for
-        row <- 0 until height
-        col <- 0 until width
-      yield{
-        if (obstacles.contains((col, row))) // replace with your specific conditions
-          "\t  * "
-        else
-          formatString.format(v((col, row))) + (if (col == width - 1) "\n" else "\t")
-      }).mkString("")
