@@ -434,4 +434,14 @@ case(s, a) if remainingItems.contains(s) =>
     (totalItems.size-remainingItems.size + 1) * 20
 ```
 
-AGGIUNGERE CONCETTO RESET
+At this point is necessary reset each episode and setup items in the map.
+For this reason I add a
+```
+trait ResetFunction:
+    def execute(): Unit
+``` 
+and a  `def resetFunction: ResetFunction` inside System trait inside QRL.scala
+
+Then I modified the QSystem case class included in `QRLImpl.scala`: I added a new parameter in the constructor: `resetMap: ResetFunction` and add the reset execution inside the learn method `system.resetFunction.execute()`.
+
+After all I added a reset method inside `ExtendedQMatrix` class. More in particular I added `resetMap: ResetFunction,` in Facade case class and add a new parameter in `def qSystem = QSystem(environment = qEnvironment(), initial, terminal, resetMap).`
