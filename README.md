@@ -417,6 +417,21 @@ The initial state is  `initial = (0,1)`.
 In case we want to add some obstacles is possible to add it like a negative reward in case Q-learning try to go in that direction.
 I saved the position of the obstacles in a list `def obstacles: Set[(Int, Int)] = Set((2,1), (5,2))` and i check every time if the next state is an obstacle and in case i set a negative reward.
 
+```
+28.24	31.38	34.05	47.83	53.14	59.05	65.61	72.90	81.00	90.00
+31.38	34.87	37.83	53.14	59.05	65.61	72.90	81.00	90.00	100.00
+34.87	38.74	43.05	47.83	53.14	49.05	65.61	72.90	81.00	90.00
+31.38	34.87	38.74	43.05	47.83	53.14	59.05	65.61	72.90	81.00
+28.24	31.38	34.87	38.74	43.05	47.83	53.14	59.05	65.61	72.90
+```
+```
+      v	      v	      v	      v	      v	      v	      v	      v	      v	      v
+      >	      v	      *	      >	      >	      >	      >	      >	      >	      >
+      >	      >	      >	      >	      ^	      *	      >	      >	      >	      ^
+      >	      >	      >	      >	      >	      >	      >	      >	      >	      ^
+      ^	      ^	      ^	      ^	      ^	      ^	      ^	      ^	      ^	      ^
+```
+
 ### Items
 
 For improve this part i added some items in a map. These items have a positive reward.
@@ -445,3 +460,20 @@ and a  `def resetFunction: ResetFunction` inside System trait inside QRL.scala
 Then I modified the QSystem case class included in `QRLImpl.scala`: I added a new parameter in the constructor: `resetMap: ResetFunction` and add the reset execution inside the learn method `system.resetFunction.execute()`.
 
 After all I added a reset method inside `ExtendedQMatrix` class. More in particular I added `resetMap: ResetFunction,` in Facade case class and add a new parameter in `def qSystem = QSystem(environment = qEnvironment(), initial, terminal, resetMap).`
+
+``` 
+60.17	74.52	70.00	74.70	82.67	91.85	102.06	113.40	102.06
+63.11	85.83	78.64	83.67	91.85	102.06	113.40	126.00	113.40
+72.08	81.04	87.96	91.85	102.06	113.40	126.00	140.00	126.00
+71.76	81.10	96.50	86.38	91.85	102.06	113.40	126.00	113.40
+66.41	72.37	82.12	90.35	83.29	91.85	102.06	113.40	102.06
+60.27	68.74	75.04	78.78	74.98	82.67	91.85	102.06	91.85
+``` 
+``` 
+      >	      v	      v	      v	      v	      >	      >	      v	      <
+      >	      $	      v	      v	      v	      >	      >	      v	      <
+      >	      ^	      >	      >	      >	      >	      >	      $	      <
+      >	      >	      >	      $	      >	      >	      >	      ^	      <
+      ^	      ^	      ^	      ^	      ^	      ^	      >	      ^	      <
+      >	      >	      ^	      ^	      ^	      ^	      >	      ^	      <
+``` 
