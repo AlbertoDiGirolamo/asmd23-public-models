@@ -52,3 +52,4 @@ trait QRL:
     def q0: Q
     def updateQ(s: State, qf: Q): (State, Q)
     def learn(episodes: Int, episodeLength: Int, qf: Q): Q
+

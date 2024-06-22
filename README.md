@@ -2,24 +2,40 @@
 
 ## Task 1: VERIFIER
 
-To achieve the targer is developed an implementation of Petri Net Readers and Writers.
-More in particulars this petri Net is composed by 7 places named: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
+To achieve the target is developed an implementation of Petri Net Readers and Writers.
+More in particular, this petri Net is composed of 7 places named: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
 
 For guarantee safety property is written three methods: `isMutuallyExclusive`, `isReachable` and `isBounded`. 
-Each of them is developed using `pnRW.paths(initialState, depth)`, this method is usefull for obtain a Seq of all possible path with a fixed length.
+Each of them is developed using `pnRW.paths(initialState, depth)`, this method is useful for get a Seq of all possible path with a fixed length.
 
 ### isMutuallyExclusive 
-This method check a Seq of paths that there aren't both Reading status and Writing status at the same time.
-More in particular with for-yield I obtain each path possible with a fixed length, for a each path I select each states.
+This method checks a Seq of paths that there aren't both Reading status and Writing status at the same time.
+More in particular, with for-yield, I obtain each path possible with a fixed length, for a each path I select each states.
 
-The `diff` function is usefull for obtain the difference between the actual state and the multiset of the wrong conditions and then check the size.
+The `diff` function is useful for get the difference between the actual state and the multiset of the wrong conditions and then check the size.
 
+```
+ def isMutuallyExclusive(initialState: MSet[Place], depth: Int): Boolean =
+    (for
+      p <- pnRW.paths(initialState, depth)
+      s <- p
+    yield s.diff(MSet(Reading, Writing)).size != s.size - 2 && s.diff(MSet(Writing, Writing)).size != s.size - 2).reduce(_ && _)
+
+```
 ### isReachable
 This method check all possible states are reachable from a fixed initial state.
 
 A for-comprehension loop iterates over all paths, over all states in each path, and over all places in each state.
 For each iteration, the current place is returned.
 Finally, all returned places are collected into a set and compared with the set of all possible places. If the two sets are equal, it means that all possible states are reachable, so the function returns true. Otherwise, it returns false. 
+```
+def isReachable(initialState: MSet[Place], depth: Int): Boolean =
+    (for
+      path <- pnRW.paths(initialState, depth)
+      state <- path
+      place <- state.asList
+    yield place).toSet == Place.values.toSet
+```
 
 ### isBounded
 
@@ -29,13 +45,25 @@ A for-comprehension loop iterates over all paths and over all states in each pat
 For each iteration, it checks if the size of the current state (i.e., the number of tokens in it) is less than or equal to the maximum number of tokens that can be in the Petri net. This is determined by the `maxTokenInPN` function.
 Finally, using `.reduce(_ && _)` all the boolean results are reduced using the logical AND operator. If all results are true, it means that the Petri net is bounded, so the function returns true. Otherwise, it returns false.
 
+```
+def isBounded(initialState: MSet[Place], depth: Int): Boolean =
+    (for
+      path: Path[Marking[Place]] <- pnRW.paths(initialState, depth)
+      state <- path
+    yield state.size <= maxTokenInPN(initialState)).reduce(_ && _)
+```
+
+Note that this solution is correct only if we apply it to a Readers and Writers Petri Net,
+because we know that in this type of nets no more tokens are generated after the initial configuration, 
+so we can know exactly the max possible amount of tokens (k + HasPermission). 
+For others Petri Nets we need to have a boundary to take into account for check if the number of tokens is increasing to infinite or not.
 ## Task 3: ARTIST
 
 ### Priorities
 The main idea is to add priority values for each transaction. Transactions with more high priority values have more priority for to be executed.
-So is added an extra parameter inside Trn clase class with 1 how to default value. It is usefull in case someone decide to not use priority function.
+So is added an extra parameter inside Trn case class with 1 how to default value. It is useful in case someone decides to not use priority function.
 
-* toSystem method is changed for transforms the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
+* toSystem method is changed to transform the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
 
 * `val maxPriority = allTransitions.map(_._1).max`: This line calculates the maximum priority among all transitions.  
 * `allTransitions.filter((p, _) => p == maxPriority).map(_._2)`: This line filters the transitions to keep only those with the maximum priority, and then maps the result to return only the markings, not the priorities.
