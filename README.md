@@ -63,7 +63,21 @@ For others Petri Nets we need to have a boundary to take into account for check 
 The main idea is to add priority values for each transaction. Transactions with more high priority values have more priority for to be executed.
 So is added an extra parameter inside Trn case class with 1 how to default value. It is useful in case someone decides to not use priority function.
 
-* toSystem method is changed to transform the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
+`case class Trn[P](cond: MSet[*[P]], eff: MSet[*[P]], inh: MSet[*[P]], priority: Int = 1)`
+
+```
+def toSystem: System[Marking[P]] = m =>
+val allTransitions =
+for
+Trn(cond, eff, inh, priority) <- pn   // get any transition
+if m disjoined inh          // check inhibition
+out <- m extract cond       // remove precondition
+yield (priority, out union eff)
+
+      val maxPriority = allTransitions.map(_._1).max
+      allTransitions.filter((p, _) => p == maxPriority).map(_._2)
+```
+* `toSystem` method is changed to transform the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
 
 * `val maxPriority = allTransitions.map(_._1).max`: This line calculates the maximum priority among all transitions.  
 * `allTransitions.filter((p, _) => p == maxPriority).map(_._2)`: This line filters the transitions to keep only those with the maximum priority, and then maps the result to return only the markings, not the priorities.
@@ -75,17 +89,22 @@ Then is added another operator for add different priorities. A possible example 
 
 The goal is add another abstraction like different colors for each transaction/token.
 A transaction has to recevice and release a token with specific color.
+* a new enumeration is added for the colors 
+```
+enum Color:
+  case Black, Red
+```
 
-Is added a new calse class where is defined a couple of values (place-color)  
+* Is added a new case class, it is defined like a couple of values (place-color)  
 ```
 @targetName("Token")
   case class *[P](place: P, color: Color = Color.Black)
 ```
-The default color is black in case someone decide to not utilise the color abstraction.
+The default color is black in case someone decides to not use the color abstraction.
 
 A possible example of this use is the follow:
 `MSet(*(Idle, Red)) ~~> MSet(*(ChooseAction, Black)),`
-in this case the transaction give a red token and release a black token.
+in this case, the transaction that goes from Idle to ChooseAction, gives a red token and releases a black token.
 
 # Lab 07
 
