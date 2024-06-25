@@ -113,17 +113,38 @@ in this case, the transaction that goes from Idle to ChooseAction, gives a red t
 The task's aim is to obtain some runs statistics about CTMC like average time of done status during execution of nruns and find the percentage about the total time spent during fail status.
 
 The solution is in `scala/u07/modelling/CTMCSimulation.scala` where there are three API for obtain statistics about a generic CTMC.
+Inside the file `scala/u07/examples/StochasticChannelSimulation.scala` there are two examples about uses of these APIs.
 
 ### averageTimeToReachState
-
+```
+def averageTimeToReachState(nRun: Int, initialState: S, stateToCheck: S) : Double =
+    (0 to nRun).foldLeft(0.0)((z, t) =>
+        z + self.newSimulationTrace(initialState, new Random)
+        .take(10)
+        .toList
+        .find(e => e._2 == stateToCheck).map(e => e.time).getOrElse(0.0)) / nRun
+```
 * The function has 3 parameters: run number, start state and state to check reachability.
-* The function uses a range from 0 to nRun and applies the foldLeft operation on it. It is useful for obtain the sum about the total time spent in DONE status.
+* The function uses a range from 0 to nRun and applies the foldLeft operation on it. It is useful to get the sum of the total time spent in DONE status.
 * For each element t in the range, it simulates a stochastic channel trace with IDLE as the initial state.
 * It then finds the first occurrence where the state is in stateToCheck and maps it to its time.
 * Finally, the total time is divided by nRun to calculate the average time.
 
 ### percentageTimeInState
+```
+def percentageTimeInState(nRun: Int, initialState: S, stateToCheck: S): Double =
+    val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
+        val (conditionTime, totTime) = self.newSimulationTrace(initialState, new Random)
+            .take(10)
+            .toList
+            .sliding(2)
+            .foldLeft((0.0, 0.0))((z, s) => if (s(0).state == stateToCheck) (z._1 + (s(1).time - s(0).time), s(1).time) else (z._1, s(1).time))
 
+        (acc._1 + conditionTime, acc._2 + totTime)
+      })
+
+      totalTimes._1 / totalTimes._2
+```
 * The function has 3 parameters:  run number, start state and state to check the percentage.
 * The function initializes totalTimes as a tuple representing the total fail time and the total time of all simulations.
 * For each element in the range, it simulates a stochastic channel trace with IDLE as the initial state and it takes the first 10 states of this trace and converts it to a list.
@@ -132,12 +153,19 @@ The solution is in `scala/u07/modelling/CTMCSimulation.scala` where there are th
 * It adds the fail time and total time of the current run to the corresponding values in totalTimes.
 * Finally, it divides the total fail time by the total time to get the relative fail time.
 
+
+A possible use of these two methods is:
+```
+@main def mainStochasticChannelSimulation =
+  println(stocChannel.averageTimeToReachState(10, IDLE, DONE))
+  println(stocChannel.percentageTimeInState(10, IDLE, FAIL))
+```
 ## Task 2: GURU
 
-First of all i realised a stochastic Petri Net of Readers and Writer using rates level provided by lecture lesson.
-The possible place inside this net are the follow: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
+First of all, I realized a stochastic Petri Net of Readers and Writer using rates level provided by lecture lesson.
+The possible places inside this net are the follow: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
 
-The stochastic Petri Net realised is the follow:
+The stochastic Petri Net realized is the follow:
 
 ```
 val spnReadersWriters = SPN[Place](
@@ -152,7 +180,7 @@ val spnReadersWriters = SPN[Place](
 
 ```
 
-To perform this task I realised a function for obtain the percentage presence of a particular state.
+To perform this task, I realized a function for get the percentage presence of a particular state.
 ```
  def percentageTimeInReadersWritersState(nRun: Int, initSet: MSet[Place], stateToCheck: Place) : Double =
     val totalTimes = (0 to nRun).foldLeft((0.0, 0.0))((acc, _) => {
@@ -238,7 +266,7 @@ In the Brussellator model, there are two transitions that consume X. To account 
 
 ## Task 1: PRISM
 
-For perform this task i'ss needed to write the model of Writers and Readers.
+To perform this task, I wrote the model of Writers and Readers.
 It is in the lecture slide like follow:
 
 ```
@@ -313,7 +341,7 @@ Yes LLM know what is and know its utility.
 
 >Certainly! In the context of a stochastic model like the one you provided, a stochastic property typically refers to a quantitative measure or condition that characterizes the behavior of the system in probabilistic terms. Stochastic properties are often expressed as logical assertions or quantitative metrics that describe certain aspects of the system's behavior over time.For example, some common stochastic properties include:1. **Reachability**: Whether a certain state or set of states can be reached from a given initial state with a non-zero probability.2. **Transient Analysis**: The probability distribution or expected time until reaching a particular state or set of states from a given initial state.3. **Steady-State Analysis**: The long-term behavior of the system, often characterized by the probability distribution of being in different states after the system has run for a sufficiently long time.4. **Safety Properties**: Properties that specify that certain unwanted states or behaviors should never occur with a high probability.5. **Liveness Properties**: Properties that specify that certain desired states or behaviors should eventually occur with a high probability. To analyze stochastic properties, probabilistic model checking tools like PRISM can be used. These tools allow users to express properties in temporal logic or other formalisms and then automatically check whether these properties hold for the given stochastic model.
 
-3. I want to try if LLM can understand what kind of proprety I like to check and taste if it is correct or not.
+3. I want to try if LLM can understand what kind of property I want to write and check if it is correct or not.
 
 >Can you write the property for check if is possible that exist an scenario where p6 and p7 have both a token?
 
@@ -484,7 +512,7 @@ I saved the position of the obstacles in a list `def obstacles: Set[(Int, Int)] 
 For improve this part i added some items in a map. These items have a positive reward.
 Every time an items is collected, that is removed from the map. I use a list for save the position of the items inside the world `var totalItems = Set((1, 1), (3, 3), (7, 2))`
 and a list for maintain in memory the concept of remaining items in a play `var remainingItems = Set((1, 1), (3, 3), (7, 2))`.
-An item is identify by  `*` symbol.
+An item is identify by  `$` symbol.
 
 For avoid that the best policy maintain a static policy near the item position i add a negative reward in case robot cross to a position where items was present.
 `case (s, a) if totalItems.contains(s) && !remainingItems.contains(s) => (totalItems.size-remainingItems.size + 1) * -4` it adds a negative growing reward.
