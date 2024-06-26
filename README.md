@@ -5,7 +5,7 @@
 To achieve the target is developed an implementation of Petri Net Readers and Writers.
 More in particular, this petri Net is composed of 7 places named: Idle, ChooseAction, ReadyToRead, ReadyToWrite, Reading, Writing and HasPermission.
 
-For guarantee safety property is written three methods: `isMutuallyExclusive`, `isReachable` and `isBounded`. 
+For guarantee safety property has been written three methods: `isMutuallyExclusive`, `isReachable` and `isBounded`. 
 Each of them is developed using `pnRW.paths(initialState, depth)`, this method is useful for get a Seq of all possible path with a fixed length.
 
 ### isMutuallyExclusive 
