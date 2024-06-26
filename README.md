@@ -63,7 +63,7 @@ For others Petri Nets we need to have a boundary to take into account for check 
 The main idea is to add priority values for each transaction. Transactions with more high priority values have more priority for to be executed.
 So is added an extra parameter inside Trn case class with 1 how to default value. It is useful in case someone decides to not use priority function.
 
-The code is available in `src/main/scala/u06/modelling/ExtendedPetriNet.scala` file.
+The code is available in `src/main/scala/u06/modelling/ExtendedPetriNet.scala` and `scala/u06/task3/ExtendedRWPetriNets.scala` files.
 
 
 `case class Trn[P](cond: MSet[*[P]], eff: MSet[*[P]], inh: MSet[*[P]], priority: Int = 1)`

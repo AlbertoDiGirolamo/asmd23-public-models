@@ -1,4 +1,4 @@
-package scala.u06.task2
+package scala.u06.task3
 
 import scala.u06.modelling.ExtendedPetriNet
 import scala.u06.modelling.ExtendedPetriNet.Color.*
