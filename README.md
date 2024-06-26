@@ -63,19 +63,22 @@ For others Petri Nets we need to have a boundary to take into account for check 
 The main idea is to add priority values for each transaction. Transactions with more high priority values have more priority for to be executed.
 So is added an extra parameter inside Trn case class with 1 how to default value. It is useful in case someone decides to not use priority function.
 
+The code is available in `src/main/scala/u06/modelling/ExtendedPetriNet.scala` file.
+
+
 `case class Trn[P](cond: MSet[*[P]], eff: MSet[*[P]], inh: MSet[*[P]], priority: Int = 1)`
 
 ```
 def toSystem: System[Marking[P]] = m =>
-val allTransitions =
-for
-Trn(cond, eff, inh, priority) <- pn   // get any transition
-if m disjoined inh          // check inhibition
-out <- m extract cond       // remove precondition
-yield (priority, out union eff)
+    val allTransitions =
+        for
+            Trn(cond, eff, inh, priority) <- pn   // get any transition
+            if m disjoined inh          // check inhibition
+            out <- m extract cond       // remove precondition
+        yield (priority, out union eff)
 
-      val maxPriority = allTransitions.map(_._1).max
-      allTransitions.filter((p, _) => p == maxPriority).map(_._2)
+    val maxPriority = allTransitions.map(_._1).max
+    allTransitions.filter((p, _) => p == maxPriority).map(_._2)
 ```
 * `toSystem` method is changed to transform the Petri net into a system by generating all possible transitions from a given marking, filtering out those with the maximum priority, and returning the resulting markings.
 
